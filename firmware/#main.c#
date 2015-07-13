@@ -1,0 +1,55 @@
+/*3軸加速度センサ実験用ソースコード*/
+#include <avr/io.h>
+
+#define FOSC   1000000//動作周波数
+#define BAUD   2400//ボーレート
+#define MYUBRR (FOSC/16/BAUD)-1
+
+// ｼﾘｱﾙ通信ｺﾏﾝﾄﾞ（ｱｽｷｰｺｰﾄﾞ)
+
+#define LF        usart_tx(0x0a)        //改行
+#define CR        usart_tx(0x0d)        //復帰
+#define HT        usart_tx(0x09)        //水平ﾀﾌﾞ
+
+void usart_tx(unsigned char data){//送信用関数
+    while( !(UCSR0A & (1<<UDRE0)) );        //送信ﾊﾞｯﾌｧ空き待機
+    UDR0 = data;
+}
+
+unsigned char usart_rx(void){//受信用関数
+    while( !(UCSR0A & (1<<RXC0)) );                //受信完了待機
+    return UDR0;                                //受信ﾃﾞｰﾀ返す
+}
+
+
+void puts_tx(char *str){//文字列送信用関数
+    while( *str != 0x00 ){ //nullになるまで実行
+        usart_tx(*str);
+        str++;                                    //ｱﾄﾞﾚｽ+1
+    }
+}
+
+void serial_ini(){
+    // シリアル通信設定
+    UBRR0 = MYUBRR;
+    UCSR0A=0b00000000;//受信すると10000000 送信有効になると00100000
+    UCSR0B|=0b00011000;//送受信有効
+    UCSR0C=0b00000110;//データ8bit、非同期、バリティなし、stop1bit
+}
+void adc_ini(){
+    //ADコンバーター設定
+    ADMUX |= _BV(REFS0)|_BV(ADLAR); 0b01100000;//AVCC左揃えADC0ピン
+    ADCSRA |= 0b10100010;//ADC許可,ADC停止,自動変換,割込み許可,32分周 6bit目を1にすることでAD変換開始
+    DIDR0　=   0b00000001;//ADC0ピン,デジタル入力禁止
+}
+
+void pin_ini(){
+    
+    
+}
+int main(void){
+    for(;;){
+    }
+    return 0;
+    
+}
